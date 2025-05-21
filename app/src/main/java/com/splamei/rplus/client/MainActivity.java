@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity
 {
     // Main data
     public static Boolean offlineMode = false; // Best off! (Unless this is a fork but just adjust the system then)
-    public static String myVerCode = "1002";
+    public static String myVerCode = "1003";
 
     // Url and Webview data
     public static String urlToLoad = "https://www.veemo.uk/r-plus"; // Full URL to load
