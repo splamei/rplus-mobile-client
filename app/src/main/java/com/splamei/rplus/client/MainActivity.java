@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity
                 .setIcon(IconCompat.createWithResource(this, R.drawable.icon))
                 .setRank(0)
                 .setIntent(new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("https://www.veemo.uk/r-plus-splamei-client/")))
+                        Uri.parse("https://rhythm-plus.com")))
                 .build();
 
         ShortcutInfoCompat licenceShortcut = new ShortcutInfoCompat.Builder(this, "licence")
