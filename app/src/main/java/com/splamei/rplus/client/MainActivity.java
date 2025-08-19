@@ -85,11 +85,13 @@ public class MainActivity extends AppCompatActivity
     RequestQueue ExampleRequestQueue;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) ->
+        {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
@@ -126,7 +128,8 @@ public class MainActivity extends AppCompatActivity
         ExampleRequestQueue = Volley.newRequestQueue(MainActivity.this);
         coordinatorLayout = findViewById(R.id.main);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+        {
             requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1008);
         }
 
@@ -175,13 +178,18 @@ public class MainActivity extends AppCompatActivity
         loginView.setInitialScale(1);
         loginView.getSettings().setUserAgentString(webView2UserAgent);
 
-        webViewClient = new WebViewClient() {
+        webViewClient = new WebViewClient()
+        {
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                if ((url.startsWith(mainUrl) && !url.contains(urlForNewTab)) || url.startsWith(urlToLoad)) {
+            public boolean shouldOverrideUrlLoading(WebView view, String url)
+            {
+                if ((url.startsWith(mainUrl) && !url.contains(urlForNewTab)) || url.startsWith(urlToLoad))
+                {
                     // load my page
                     return false;
-                } else if (url.contains(urlForNewTab)) {
+                }
+                else if (url.contains(urlForNewTab))
+                {
                     hasShownAuth = false;
 
                     webView.setVisibility(View.GONE);
@@ -192,7 +200,6 @@ public class MainActivity extends AppCompatActivity
 
                     loginView.clearHistory();
 
-                    //Toast.makeText(MainActivity.this, secondTabLoadToastMessage, Toast.LENGTH_SHORT).show();
                     Snackbar snackbar = Snackbar.make(coordinatorLayout,
                             secondTabLoadToastMessage, Snackbar.LENGTH_LONG);
                     snackbar.show();
@@ -207,7 +214,8 @@ public class MainActivity extends AppCompatActivity
             }
 
             @Override
-            public void onPageFinished(WebView view, String url) {
+            public void onPageFinished(WebView view, String url)
+            {
                 ImageView imageView = findViewById(R.id.splashImg);
                 imageView.setVisibility(View.INVISIBLE);
 
@@ -218,15 +226,17 @@ public class MainActivity extends AppCompatActivity
             }
         };
 
-        loginClient = new WebViewClient() {
+        loginClient = new WebViewClient()
+        {
             @Override
-            public void onPageFinished(WebView view, String url) {
+            public void onPageFinished(WebView view, String url)
+            {
 
-                if (url.contains(urlForNewTabClosure)) {
+                if (url.contains(urlForNewTabClosure))
+                {
                     webView.setVisibility(View.VISIBLE);
                     loginView.setVisibility(View.GONE);
 
-                    //Toast.makeText(MainActivity.this, secondTabNormalCloseMessage, Toast.LENGTH_SHORT).show();
                     Snackbar snackbar = Snackbar.make(coordinatorLayout,
                             secondTabNormalCloseMessage, Snackbar.LENGTH_LONG);
                     snackbar.show();
@@ -242,22 +252,30 @@ public class MainActivity extends AppCompatActivity
         android.util.Log.i("onCreate", "Client Started. Now checking for updates...");
 
         String url = updateUrl;
-        StringRequest ExampleStringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+        StringRequest ExampleStringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>()
+        {
             @Override
-            public void onResponse(String response) {
-                if (fileExists(MainActivity.this, "checkCode.dat")) {
-                    if (!readFile(MainActivity.this, "checkCode.dat").strip().equals(response.strip())) {
+            public void onResponse(String response)
+            {
+                if (fileExists(MainActivity.this, "checkCode.dat"))
+                {
+                    if (!readFile(MainActivity.this, "checkCode.dat").strip().equals(response.strip()))
+                    {
                         saveToFile(MainActivity.this, "checkCode.dat", response.strip());
                         newUpdate(MainActivity.this, response.strip());
                     }
-                } else {
+                }
+                else
+                {
                     saveToFile(MainActivity.this, "checkCode.dat", response);
                     newUpdate(MainActivity.this, response);
                 }
             }
-        }, new Response.ErrorListener() {
+        },new Response.ErrorListener()
+        {
             @Override
-            public void onErrorResponse(VolleyError e) {
+            public void onErrorResponse(VolleyError e)
+            {
                 android.util.Log.i("onCreate", "Failed to check for updates " + e);
                 Snackbar snackbar = Snackbar.make(coordinatorLayout,
                         "Failed to check for updates", Snackbar.LENGTH_LONG);
@@ -270,30 +288,38 @@ public class MainActivity extends AppCompatActivity
         android.util.Log.i("onCreate", "Now checking for notices");
 
         String urlNotices = noticesUrl;
-        StringRequest NoticesStringRequest = new StringRequest(Request.Method.GET, urlNotices, new Response.Listener<String>() {
+        StringRequest NoticesStringRequest = new StringRequest(Request.Method.GET, urlNotices, new Response.Listener<String>()
+        {
             @Override
-            public void onResponse(String response) {
-                try {
+            public void onResponse(String response)
+            {
+                try
+                {
                     String regex = "[;]";
                     String[] splitNotices;
 
                     splitNotices = response.split(regex);
 
                     String seenNotices = readFile(MainActivity.this, "seenNotices.dat").strip();
-                    if (!seenNotices.contains(splitNotices[3]) && !splitNotices[0].equals("NONE")) {
+                    if (!seenNotices.contains(splitNotices[3]) && !splitNotices[0].equals("NONE"))
+                    {
                         saveToFile(MainActivity.this, "seenNotices.dat", splitNotices[3]);
                         showNewNotice(MainActivity.this, splitNotices[0], splitNotices[1], splitNotices[2]);
                     }
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     android.util.Log.i("onCreate", "Failed to decode notices - " + e);
                     Snackbar snackbar = Snackbar.make(coordinatorLayout,
                             "Failed to decode notices", Snackbar.LENGTH_LONG);
                     snackbar.show();
                 }
             }
-        }, new Response.ErrorListener() {
+        }, new Response.ErrorListener()
+        {
             @Override
-            public void onErrorResponse(VolleyError e) {
+            public void onErrorResponse(VolleyError e)
+            {
                 android.util.Log.i("onCreate", "Failed to get current notices - " + e);
                 Snackbar snackbar = Snackbar.make(coordinatorLayout,
                         "Failed to get current notices", Snackbar.LENGTH_LONG);
@@ -305,38 +331,46 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (event.getAction() == KeyEvent.ACTION_DOWN) {
-            switch (keyCode) {
-                case KeyEvent.KEYCODE_BACK:
-                    if (webView.getVisibility() == View.VISIBLE){
-                        if (webView.canGoBack()) {
-                            webView.goBack();
-                        }
-                        return true;
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        if (event.getAction() == KeyEvent.ACTION_DOWN)
+        {
+            if (keyCode == KeyEvent.KEYCODE_BACK)
+            {
+                if (webView.getVisibility() == View.VISIBLE)
+                {
+                    if (webView.canGoBack())
+                    {
+                        webView.goBack();
                     }
-                    else if (loginView.getVisibility() == View.VISIBLE){
-                        if (loginView.canGoBack()) {
-                            loginView.goBack();
-                        }
-                        else{
-                            webView.setVisibility(View.VISIBLE);
-                            loginView.setVisibility(View.GONE);
+                    return true;
+                }
+                else if (loginView.getVisibility() == View.VISIBLE)
+                {
+                    if (loginView.canGoBack())
+                    {
+                        loginView.goBack();
+                    }
+                    else
+                    {
+                        webView.setVisibility(View.VISIBLE);
+                        loginView.setVisibility(View.GONE);
 
-                            loginView.loadUrl("about:blank");
-                        }
-                        return true;
+                        loginView.loadUrl("about:blank");
                     }
+                    return true;
+                }
             }
-
         }
         return super.onKeyDown(keyCode, event);
     }
 
-    public static void createChannel(Context context, final String ID, String title, String description, int importance) {
+    public static void createChannel(Context context, final String ID, String title, String description, int importance)
+    {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        if (notificationManager != null && notificationManager.getNotificationChannel(ID) == null) {
+        if (notificationManager != null && notificationManager.getNotificationChannel(ID) == null)
+        {
             NotificationChannel channel = new NotificationChannel(ID, title, importance);
             channel.setDescription(description);
             channel.enableLights(true);
@@ -359,12 +393,14 @@ public class MainActivity extends AppCompatActivity
                 .setPriority(importance);
 
         NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
-        if (notificationManagerCompat.areNotificationsEnabled()){
+        if (notificationManagerCompat.areNotificationsEnabled())
+        {
             notificationManagerCompat.notify(id, builder.build());
         }
     }
 
-    public static boolean sendNotificationWithURL(Context context, final String ID, String title, String message, int importance, String url, String buttonText, int notifcationID) {
+    public static boolean sendNotificationWithURL(Context context, final String ID, String title, String message, int importance, String url, String buttonText, int notifcationID)
+    {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
@@ -381,7 +417,8 @@ public class MainActivity extends AppCompatActivity
 
         NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
 
-        if (notificationManagerCompat.areNotificationsEnabled()) {
+        if (notificationManagerCompat.areNotificationsEnabled())
+        {
             notificationManagerCompat.notify(notifcationID, builder.build());
 
             return true;
@@ -411,43 +448,54 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public static String readFile(Context context, String fileName) {
+    public static String readFile(Context context, String fileName)
+    {
         File file = new File(context.getFilesDir(), fileName);
         StringBuilder text = new StringBuilder();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(file)))
+        {
             String line;
             while ((line = br.readLine()) != null) {
                 text.append(line).append("\n");
             }
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             android.util.Log.e("readFile", "Failed to read file '" + fileName + "'! - " + e);
         }
 
         return text.toString();
     }
 
-    public static void saveToFile(Context context, String fileName, String content) {
-        try (FileOutputStream outputStream = context.openFileOutput(fileName, Context.MODE_PRIVATE)) {
+    public static void saveToFile(Context context, String fileName, String content)
+    {
+        try (FileOutputStream outputStream = context.openFileOutput(fileName, Context.MODE_PRIVATE))
+        {
             outputStream.write(content.getBytes());
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             android.util.Log.e("saveToFile", "Failed to save file '" + fileName + "'! - " + e);
         }
     }
 
-    public static boolean fileExists(Context context, String fileName) {
+    public static boolean fileExists(Context context, String fileName)
+    {
         File file = new File(context.getFilesDir(), fileName);
         return file.exists();
     }
 
     public static void newUpdate(Context context, String responce)
     {
-        if (!myVerCode.contains(responce)) {
+        if (!myVerCode.contains(responce))
+        {
             android.util.Log.i("newUpdate", "New update to the client! Showing user");
 
             showDialogBox(context, "New update", "There is a new update to the client app. It's recommended you update for the latest fixes and changes however you can optionally skip\n\nYou won't be alerted about this update again until there is a new update", "Update", "Later", new DialogInterface.OnClickListener() {
                 @Override
-                public void onClick(DialogInterface dialog, int which) {
+                public void onClick(DialogInterface dialog, int which)
+                {
                     Toast.makeText(context, "GitHub should now open via the app or website", Toast.LENGTH_SHORT).show();
                     context.startActivity(new Intent(Intent.ACTION_VIEW,
                             Uri.parse("https://github.com/splamei/rplus-mobile-client/releases/")));
@@ -465,9 +513,11 @@ public class MainActivity extends AppCompatActivity
         }
         else
         {
-            showDialogBox(context, title, text, "Ok", "More", null, new DialogInterface.OnClickListener() {
+            showDialogBox(context, title, text, "Ok", "More", null, new DialogInterface.OnClickListener()
+            {
                 @Override
-                public void onClick(DialogInterface dialog, int which) {
+                public void onClick(DialogInterface dialog, int which)
+                {
                     Toast.makeText(context, "You are now being directed to the url provided", Toast.LENGTH_SHORT).show();
                     context.startActivity(new Intent(Intent.ACTION_VIEW,
                             Uri.parse(url)));
