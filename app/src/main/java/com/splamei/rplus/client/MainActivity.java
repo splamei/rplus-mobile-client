@@ -95,6 +95,8 @@ public class MainActivity extends AppCompatActivity
             return insets;
         });
 
+        android.util.Log.i("onCreate", "Client starting...");
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         createChannel(this, MISC_CHANNEL_ID, "Misc", "Other notifications used by the client", NotificationManager.IMPORTANCE_DEFAULT);
@@ -130,6 +132,8 @@ public class MainActivity extends AppCompatActivity
 
         int UI_OPTIONS = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
         getWindow().getDecorView().setSystemUiVisibility(UI_OPTIONS);
+
+        android.util.Log.i("onCreate", "Starting Web View....");
 
         webView = findViewById(R.id.mainWeb);
         webView.getSettings().setJavaScriptEnabled(true);
@@ -235,6 +239,7 @@ public class MainActivity extends AppCompatActivity
         webView.setWebViewClient(webViewClient);
         webView.loadUrl(urlToLoad);
 
+        android.util.Log.i("onCreate", "Client Started. Now checking for updates...");
 
         String url = updateUrl;
         StringRequest ExampleStringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
@@ -250,10 +255,10 @@ public class MainActivity extends AppCompatActivity
                     newUpdate(MainActivity.this, response);
                 }
             }
-        }, new Response.ErrorListener() { //Create an error listener to handle errors appropriately.
+        }, new Response.ErrorListener() {
             @Override
-            public void onErrorResponse(VolleyError error) {
-                //Toast.makeText(MainActivity.this, "Error checking for updates", Toast.LENGTH_SHORT).show();
+            public void onErrorResponse(VolleyError e) {
+                android.util.Log.i("onCreate", "Failed to check for updates " + e);
                 Snackbar snackbar = Snackbar.make(coordinatorLayout,
                         "Failed to check for updates", Snackbar.LENGTH_LONG);
                 snackbar.show();
@@ -261,6 +266,8 @@ public class MainActivity extends AppCompatActivity
         });
 
         ExampleRequestQueue.add(ExampleStringRequest);
+
+        android.util.Log.i("onCreate", "Now checking for notices");
 
         String urlNotices = noticesUrl;
         StringRequest NoticesStringRequest = new StringRequest(Request.Method.GET, urlNotices, new Response.Listener<String>() {
@@ -274,38 +281,27 @@ public class MainActivity extends AppCompatActivity
 
                     String seenNotices = readFile(MainActivity.this, "seenNotices.dat").strip();
                     if (!seenNotices.contains(splitNotices[3]) && !splitNotices[0].equals("NONE")) {
-                        //Toast.makeText(MainActivity.this, "There's a new notice. Check the notification we sent you if enabled.", Toast.LENGTH_SHORT).show();
                         saveToFile(MainActivity.this, "seenNotices.dat", splitNotices[3]);
                         showNewNotice(MainActivity.this, splitNotices[0], splitNotices[1], splitNotices[2]);
-
-                        //if (!Objects.equals(splitNotices[2], "NONE")) {
-                        //    sendNotificationWithURL(MainActivity.this, NOTICES_CHANNEL_ID, splitNotices[0], splitNotices[1], NotificationCompat.PRIORITY_DEFAULT, splitNotices[2], "More Info");
-                        //} else {
-                        //    sendNotifcation(MainActivity.this, NOTICES_CHANNEL_ID, splitNotices[0], splitNotices[1], NotificationCompat.PRIORITY_DEFAULT);
-                        //}
                     }
                 } catch (Exception e) {
-                    //Toast.makeText(MainActivity.this, "Error decoding notices", Toast.LENGTH_SHORT).show();
+                    android.util.Log.i("onCreate", "Failed to decode notices - " + e);
                     Snackbar snackbar = Snackbar.make(coordinatorLayout,
                             "Failed to decode notices", Snackbar.LENGTH_LONG);
                     snackbar.show();
                 }
             }
-        }, new Response.ErrorListener() { //Create an error listener to handle errors appropriately.
+        }, new Response.ErrorListener() {
             @Override
-            public void onErrorResponse(VolleyError error) {
-                //Toast.makeText(MainActivity.this, "Error getting notices", Toast.LENGTH_SHORT).show();
+            public void onErrorResponse(VolleyError e) {
+                android.util.Log.i("onCreate", "Failed to get current notices - " + e);
                 Snackbar snackbar = Snackbar.make(coordinatorLayout,
                         "Failed to get current notices", Snackbar.LENGTH_LONG);
                 snackbar.show();
             }
         });
 
-        //if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
         ExampleRequestQueue.add(NoticesStringRequest);
-        //} else {
-        //    Toast.makeText(this, "To see notices and updates, please enable notifications", Toast.LENGTH_LONG).show();
-        //}
     }
 
     @Override
@@ -351,7 +347,9 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public static void sendNotifcation(Context context, final String ID, String title, String message, int importance, int id){
+    public static void sendNotifcation(Context context, final String ID, String title, String message, int importance, int id)
+    {
+        android.util.Log.i("sendNotifcation", "Sending notifcation - '" + title + "' - '" + message + "'");
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, ID)
                 .setContentTitle(title)
@@ -367,11 +365,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     public static boolean sendNotificationWithURL(Context context, final String ID, String title, String message, int importance, String url, String buttonText, int notifcationID) {
-        // Create an Intent to open the URL
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
-        // Create a NotificationCompat.Builder
+        android.util.Log.i("sendNotifcationWithURL", "Sending notifcation - '" + title + "' - '" + message + "'");
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, ID)
                 .setContentTitle(title)
                 .setContentText(message)
@@ -380,12 +378,9 @@ public class MainActivity extends AppCompatActivity
                 .setPriority(importance)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent); // Set the pending intent for the notification
-                //.addAction(R.drawable.ic_stat_name, buttonText, pendingIntent); // Add the "Update" action
 
-        // Create a NotificationManagerCompat
         NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
 
-        // Check if notifications are enabled
         if (notificationManagerCompat.areNotificationsEnabled()) {
             notificationManagerCompat.notify(notifcationID, builder.build());
 
@@ -426,7 +421,7 @@ public class MainActivity extends AppCompatActivity
                 text.append(line).append("\n");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            android.util.Log.e("readFile", "Failed to read file '" + fileName + "'! - " + e);
         }
 
         return text.toString();
@@ -436,7 +431,7 @@ public class MainActivity extends AppCompatActivity
         try (FileOutputStream outputStream = context.openFileOutput(fileName, Context.MODE_PRIVATE)) {
             outputStream.write(content.getBytes());
         } catch (IOException e) {
-            e.printStackTrace();
+            android.util.Log.e("saveToFile", "Failed to save file '" + fileName + "'! - " + e);
         }
     }
 
@@ -445,11 +440,10 @@ public class MainActivity extends AppCompatActivity
         return file.exists();
     }
 
-    public static void newUpdate(Context context, String responce){
+    public static void newUpdate(Context context, String responce)
+    {
         if (!myVerCode.contains(responce)) {
-            //sendNotificationWithURL(context, UPDATE_CHANNEL_ID, "New Update", "The is a new update to the client. Tap or press the button to update. You won't be alerted about this update again.", NotificationCompat.PRIORITY_DEFAULT, "https://www.veemo.uk/r-plus-download", "Update");
-            //Toast.makeText(context, "Theres a new update to the client", Toast.LENGTH_LONG).show();
-            //Toast.makeText(context, "Check the GitHub Repo to update the client", Toast.LENGTH_LONG).show();
+            android.util.Log.i("newUpdate", "New update to the client! Showing user");
 
             showDialogBox(context, "New update", "There is a new update to the client app. It's recommended you update for the latest fixes and changes however you can optionally skip\n\nYou won't be alerted about this update again until there is a new update", "Update", "Later", new DialogInterface.OnClickListener() {
                 @Override
