@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity
 
     // String data
     public static String secondTabNormalCloseMessage = "Welcome to Rhythm Plus";
-    public static String seccondTabLoadToastMessage = "Please wait while the sign-in page loads";
+    public static String secondTabLoadToastMessage = "Please wait while the sign-in page loads";
 
 
 
@@ -188,9 +188,9 @@ public class MainActivity extends AppCompatActivity
 
                     loginView.clearHistory();
 
-                    //Toast.makeText(MainActivity.this, seccondTabLoadToastMessage, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(MainActivity.this, secondTabLoadToastMessage, Toast.LENGTH_SHORT).show();
                     Snackbar snackbar = Snackbar.make(coordinatorLayout,
-                            seccondTabLoadToastMessage, Snackbar.LENGTH_LONG);
+                            secondTabLoadToastMessage, Snackbar.LENGTH_LONG);
                     snackbar.show();
 
                     return true;
