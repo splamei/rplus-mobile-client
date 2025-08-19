@@ -337,19 +337,17 @@ public class MainActivity extends AppCompatActivity
         return super.onKeyDown(keyCode, event);
     }
 
-    public static void createChannel(Context context, final String ID, String title, String description, int importance)
-    {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            if (notificationManager != null && notificationManager.getNotificationChannel(ID) == null){
-                NotificationChannel channel = new NotificationChannel(ID, title, importance);
-                channel.setDescription(description);
-                channel.enableLights(true);
-                channel.setLightColor(Color.MAGENTA);
-                channel.enableVibration(true);
+    public static void createChannel(Context context, final String ID, String title, String description, int importance) {
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-                notificationManager.createNotificationChannel(channel);
-            }
+        if (notificationManager != null && notificationManager.getNotificationChannel(ID) == null) {
+            NotificationChannel channel = new NotificationChannel(ID, title, importance);
+            channel.setDescription(description);
+            channel.enableLights(true);
+            channel.setLightColor(Color.MAGENTA);
+            channel.enableVibration(true);
+
+            notificationManager.createNotificationChannel(channel);
         }
     }
 
