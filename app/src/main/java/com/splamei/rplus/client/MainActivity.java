@@ -53,7 +53,6 @@ import java.io.IOException;
 public class MainActivity extends AppCompatActivity
 {
     // Main data
-    public static Boolean offlineMode = false; // Best off! (Unless this is a fork but just adjust the system then)
     public static String myVerCode = "1003";
 
     // Url and Webview data
@@ -125,7 +124,7 @@ public class MainActivity extends AppCompatActivity
         ExampleRequestQueue = Volley.newRequestQueue(MainActivity.this);
         coordinatorLayout = findViewById(R.id.main);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1008);
         }
 
@@ -172,14 +171,13 @@ public class MainActivity extends AppCompatActivity
         loginView.setInitialScale(1);
         loginView.getSettings().setUserAgentString(webView2UserAgent);
 
-        webViewClient = new WebViewClient(){
+        webViewClient = new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                if((url.startsWith(mainUrl) && !url.contains(urlForNewTab)) || url.startsWith(urlToLoad)){
+                if ((url.startsWith(mainUrl) && !url.contains(urlForNewTab)) || url.startsWith(urlToLoad)) {
                     // load my page
                     return false;
-                }
-                else if (url.contains(urlForNewTab)) {
+                } else if (url.contains(urlForNewTab)) {
                     hasShownAuth = false;
 
                     webView.setVisibility(View.GONE);
@@ -216,7 +214,7 @@ public class MainActivity extends AppCompatActivity
             }
         };
 
-        loginClient = new WebViewClient(){
+        loginClient = new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
 
@@ -238,78 +236,76 @@ public class MainActivity extends AppCompatActivity
         webView.loadUrl(urlToLoad);
 
 
-        if (!offlineMode) {
-            String url = updateUrl;
-            StringRequest ExampleStringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    if (fileExists(MainActivity.this, "checkCode.dat")) {
-                        if (!readFile(MainActivity.this, "checkCode.dat").strip().equals(response.strip())) {
-                            saveToFile(MainActivity.this, "checkCode.dat", response.strip());
-                            newUpdate(MainActivity.this, response.strip());
-                        }
-                    } else {
-                        saveToFile(MainActivity.this, "checkCode.dat", response);
-                        newUpdate(MainActivity.this, response);
+        String url = updateUrl;
+        StringRequest ExampleStringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                if (fileExists(MainActivity.this, "checkCode.dat")) {
+                    if (!readFile(MainActivity.this, "checkCode.dat").strip().equals(response.strip())) {
+                        saveToFile(MainActivity.this, "checkCode.dat", response.strip());
+                        newUpdate(MainActivity.this, response.strip());
                     }
+                } else {
+                    saveToFile(MainActivity.this, "checkCode.dat", response);
+                    newUpdate(MainActivity.this, response);
                 }
-            }, new Response.ErrorListener() { //Create an error listener to handle errors appropriately.
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    //Toast.makeText(MainActivity.this, "Error checking for updates", Toast.LENGTH_SHORT).show();
+            }
+        }, new Response.ErrorListener() { //Create an error listener to handle errors appropriately.
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                //Toast.makeText(MainActivity.this, "Error checking for updates", Toast.LENGTH_SHORT).show();
+                Snackbar snackbar = Snackbar.make(coordinatorLayout,
+                        "Failed to check for updates", Snackbar.LENGTH_LONG);
+                snackbar.show();
+            }
+        });
+
+        ExampleRequestQueue.add(ExampleStringRequest);
+
+        String urlNotices = noticesUrl;
+        StringRequest NoticesStringRequest = new StringRequest(Request.Method.GET, urlNotices, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    String regex = "[;]";
+                    String[] splitNotices;
+
+                    splitNotices = response.split(regex);
+
+                    String seenNotices = readFile(MainActivity.this, "seenNotices.dat").strip();
+                    if (!seenNotices.contains(splitNotices[3]) && !splitNotices[0].equals("NONE")) {
+                        //Toast.makeText(MainActivity.this, "There's a new notice. Check the notification we sent you if enabled.", Toast.LENGTH_SHORT).show();
+                        saveToFile(MainActivity.this, "seenNotices.dat", splitNotices[3]);
+                        showNewNotice(MainActivity.this, splitNotices[0], splitNotices[1], splitNotices[2]);
+
+                        //if (!Objects.equals(splitNotices[2], "NONE")) {
+                        //    sendNotificationWithURL(MainActivity.this, NOTICES_CHANNEL_ID, splitNotices[0], splitNotices[1], NotificationCompat.PRIORITY_DEFAULT, splitNotices[2], "More Info");
+                        //} else {
+                        //    sendNotifcation(MainActivity.this, NOTICES_CHANNEL_ID, splitNotices[0], splitNotices[1], NotificationCompat.PRIORITY_DEFAULT);
+                        //}
+                    }
+                } catch (Exception e) {
+                    //Toast.makeText(MainActivity.this, "Error decoding notices", Toast.LENGTH_SHORT).show();
                     Snackbar snackbar = Snackbar.make(coordinatorLayout,
-                            "Failed to check for updates", Snackbar.LENGTH_LONG);
+                            "Failed to decode notices", Snackbar.LENGTH_LONG);
                     snackbar.show();
                 }
-            });
+            }
+        }, new Response.ErrorListener() { //Create an error listener to handle errors appropriately.
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                //Toast.makeText(MainActivity.this, "Error getting notices", Toast.LENGTH_SHORT).show();
+                Snackbar snackbar = Snackbar.make(coordinatorLayout,
+                        "Failed to get current notices", Snackbar.LENGTH_LONG);
+                snackbar.show();
+            }
+        });
 
-            ExampleRequestQueue.add(ExampleStringRequest);
-
-            String urlNotices = noticesUrl;
-            StringRequest NoticesStringRequest = new StringRequest(Request.Method.GET, urlNotices, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    try {
-                        String regex = "[;]";
-                        String[] splitNotices;
-
-                        splitNotices = response.split(regex);
-
-                        String seenNotices = readFile(MainActivity.this, "seenNotices.dat").strip();
-                        if (!seenNotices.contains(splitNotices[3]) && !splitNotices[0].equals("NONE")) {
-                            //Toast.makeText(MainActivity.this, "There's a new notice. Check the notification we sent you if enabled.", Toast.LENGTH_SHORT).show();
-                            saveToFile(MainActivity.this, "seenNotices.dat", splitNotices[3]);
-                            showNewNotice(MainActivity.this, splitNotices[0], splitNotices[1], splitNotices[2]);
-
-                            //if (!Objects.equals(splitNotices[2], "NONE")) {
-                            //    sendNotificationWithURL(MainActivity.this, NOTICES_CHANNEL_ID, splitNotices[0], splitNotices[1], NotificationCompat.PRIORITY_DEFAULT, splitNotices[2], "More Info");
-                            //} else {
-                            //    sendNotifcation(MainActivity.this, NOTICES_CHANNEL_ID, splitNotices[0], splitNotices[1], NotificationCompat.PRIORITY_DEFAULT);
-                            //}
-                        }
-                    } catch (Exception e) {
-                        //Toast.makeText(MainActivity.this, "Error decoding notices", Toast.LENGTH_SHORT).show();
-                        Snackbar snackbar = Snackbar.make(coordinatorLayout,
-                                "Failed to decode notices", Snackbar.LENGTH_LONG);
-                        snackbar.show();
-                    }
-                }
-            }, new Response.ErrorListener() { //Create an error listener to handle errors appropriately.
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    //Toast.makeText(MainActivity.this, "Error getting notices", Toast.LENGTH_SHORT).show();
-                    Snackbar snackbar = Snackbar.make(coordinatorLayout,
-                            "Failed to get current notices", Snackbar.LENGTH_LONG);
-                    snackbar.show();
-                }
-            });
-
-            //if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-            ExampleRequestQueue.add(NoticesStringRequest);
-            //} else {
-            //    Toast.makeText(this, "To see notices and updates, please enable notifications", Toast.LENGTH_LONG).show();
-            //}
-        }
+        //if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+        ExampleRequestQueue.add(NoticesStringRequest);
+        //} else {
+        //    Toast.makeText(this, "To see notices and updates, please enable notifications", Toast.LENGTH_LONG).show();
+        //}
     }
 
     @Override
